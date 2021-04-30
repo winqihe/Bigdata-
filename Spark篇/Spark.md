@@ -140,3 +140,65 @@ rdd.collect().foreach(print)
 rdd.take(100).foreach(print)
 ```
 
+### 键值对RDD
+
+键值对RDD是一种常见的RDD元素类型，分组和聚合操作中经常会用到。
+
+Spark中经常会用到键值对RDD，用于完成聚合计算。
+
+### 创建RDD的准备工作
+
+启动hdfs组件：``` start-dfs.sh```
+
+启动pyspark  ```pyspark```
+
+创建目录：```mkdir pairrdd```
+
+之后vim word.txt 输入一些数据即可。
+
+### 键值对RDD的创建
+
+1. 从文件中加载
+
+主要的创建方式是使用map()函数来实现。
+
+```python
+lines = sc.textFile("file:///usr/local/spark/mycode/pairrdd/word.txt")
+pairrdd = lines.flatMap(lambda line : line.split(" ")).map(lambda word :(word,1))
+pairrdd.foreach(print)
+```
+
+>1. (i,1)
+>2. (love,1)
+>3. (hadoop,1)
+>4. (i,1)
+>5. (love,1)
+>6. (Spark,1)
+>7. (Spark,1)
+>8. (is,1)
+>9. (fast,1)
+>10. (than,1)
+>11. (hadoop,1)
+
+2. 通过并行集合（列表）创建RDD
+
+```python
+list = ["hadoop","hive","spark","spark"]
+rdd = sc.parallelize(list)
+pairrdd = rdd.map(lambda word : (word,1))
+pairrdd.foreach(print)
+```
+
+>1. (Hadoop,1)
+>2. (Spark,1)
+>3. (Hive,1)
+>4. (Spark,1)
+
+### 常用的键值对操作转换
+
+常用的键值对转换操作包括reduceByKey()、groupByKey()、sortByKey()、join()、cogroup()等
+
+#### reduceByKey(func)
+
+
+
