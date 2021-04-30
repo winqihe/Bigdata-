@@ -1,4 +1,4 @@
-# Spark
+Spark
 
 ### RDD创建：
 
@@ -103,4 +103,40 @@ print(',',join(rdd.collect())) //行动操作，触发一次计算
 
 可以通过持久话（缓存）机制来避免反复计算对内存的开销。
 
-使用persist()方法对一个RDD标记为持久化，叫标记为持久化，因为出现persist()的地方并不会立即计算生成RDD把它持久化，而是要遇到一个行动操作才会对计算结果进行持久化。
+使用persist()方法对一个RDD标记为持久化，叫标记为持久化，因为出现persist()的地方并不会立即计算生成RDD把它持久化，而是要遇到一个行动操作才会对计算结果进行持 久化。
+
+persist()括号中包含的是持久化级别参数，persist(MEMORY_ONLY) 表示将RDD反序列化的对象存储在JVM中，如果内存不足，就要按照LRU原则替换缓存中的内容，persist(MEMORY_AND_DISK)表示将RDD反序列化的对象存储在JVM中，超出的分区会被存放在硬盘上。
+
+### 分区
+
+RDD是弹性分布式数据集，一般来讲RDD较大，所以设置分区保存在不同的节点上，RDD分区一个原则是尽量将RDD分区数等于集群cpu核心数。
+
+*本地模式：默认为本地机器的CPU数目，若设置了local[N],则默认为N；
+*Apache Mesos：默认的分区数为8；
+*Standalone或YARN：在“集群中所有CPU核心数目总和”和“2”二者中取较大值作为默认值；
+
+对于parallelize来讲，如果没有在方法中指定分区数，则默认为spark.default.parallelism，
+
+```python
+array = ["1","2","3"]
+rdd = sc.parallelize(array,2) //设置分区数为2
+```
+
+如果是从hdfs中读取文件，则分区数为文件分片数（128/片）
+
+### 打印元素
+
+为了能够把worker节点上的打印信息也显示到Driver program上，通常使用collect()方法
+
+```python
+rdd.collect().foreach(print)
+```
+
+因为collect()方法会把所有worker节点上面的RDD元素采集到Driver program上，所以可能会导致内存溢出，
+
+所以可以来打印部分元素 ： 
+
+```python
+rdd.take(100).foreach(print)
+```
+
